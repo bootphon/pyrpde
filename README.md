@@ -1,8 +1,9 @@
 # pyRPDE
 
 A full-python implementation of the Recurrence Period Density Entropy metric.
-It's based on the algorithm described in [^1], and based on Max Little's 
-R (and C) implementation in [^2].
+It's based on the algorithm described in [^1], and on Max Little's 
+R (and C) implementation in [^2]. It relies on Numba to make the return distance computation
+as fast as possible without having to resort to Cython or C/C++ bindings.
 
 ## Installation
 
@@ -24,13 +25,15 @@ Here are its arguments:
     Arguments:
     ----------
     time_series: np.ndarray
-        The input time series. Has to be floats, normalized to [-1,1]
+        The input time series. Has to be float32, normalized to [-1,1]
     dim: int
-        The dimension of the time series embeddings. Defaults to 4
+        The dimension of the time series embeddings. 
+        Defaults to 4
     tau: int
         The "stride" between each of the embedding points in a time series'
-        embedding vector. Defaults to 35. Should be adjusted depending on the
+        embedding vector. Should be adjusted depending on the
         sampling rate of your input data.
+        Defaults to 35.
     epsilon: float
         The size of the unit ball described in the RPDE algorithm.
         Defaults to 0.12.
@@ -41,7 +44,8 @@ Here are its arguments:
         Defaults to None.
     parallel: boolean, optional
         Use the parallelized Numba implementation. The parallelization overhead
-        might make this slower in certain situations. Defaults to True.
+        might make this slower in certain situations. 
+        Defaults to True.
     
     Returns
     -------
@@ -65,9 +69,9 @@ from scipy.io.wavfile import read
 # make sure your audio data is in float32. Else, either use librosa or 
 # normalize it [-1,1] by dividing it by 2 ** 16 if it's 16bit PCM
 rate, data = read("audio_data.wav")
-entropy, histogram = rpde(data, tau=30, dim=4, parallel=True, epsilon=0.01)
+entropy, histogram = rpde(data, tau=30, dim=4, epsilon=0.01, tmax=1500)
 
 ```
 
-[^1]: https://link.springer.com/article/10.1186/1475-925X-6-23
+[^1]: http://www.biomedical-engineering-online.com/content/6/1/23
 [^2]: http://www.maxlittle.net/software/index.php

@@ -5,15 +5,26 @@ import numba as nb
 from scipy.stats import entropy
 
 
-@nb.jit(nb.int32[:](nb.float32[:, :], nb.float32, nb.int32), nopython=True)
+@nb.jit(nb.int32[:](nb.float32[:, :], nb.float32, nb.int32),
+        nopython=True)
 def recurrence_histogram(ts: np.ndarray, epsilon: float, t_max: int):
     """Numba implementation of the recurrence histogram described in
     http://www.biomedical-engineering-online.com/content/6/1/23
 
-    :param ts: Time series of dimension (T,N)
-    :param epsilon: Recurrence ball radius
-    :param t_max: Maximum distance for return.
-    Larger distances are not recorded. Set to -1 for infinite distance.
+    Parameters
+    ----------
+    ts: np.ndarray
+        Time series of dimension (T,N)
+    epsilon: float:
+        Recurrence ball radius
+    t_max: int
+        Maximum distance for return.
+        Larger distances are not recorded. Set to -1 for infinite distance.
+
+    Returns
+    -------
+    recurrence_histogram: np.ndarray
+        Histogram of return distances
     """
     return_distances = np.zeros(len(ts), dtype=np.int32)
     for i in np.arange(len(ts)):
@@ -38,19 +49,20 @@ def recurrence_histogram(ts: np.ndarray, epsilon: float, t_max: int):
     return return_distances
 
 
-@nb.jit(nb.int32[:](nb.float32[:, :], nb.float32, nb.int32), parallel=True, nopython=True)
+@nb.jit(nb.int32[:](nb.float32[:, :], nb.float32, nb.int32),
+        parallel=True, nopython=True)
 def parallel_recurrence_histogram(ts: np.ndarray, epsilon: float,
                                   t_max: int):
-    """Parallelized implem of the recurrence histogram. Works the same,
+    """Parallelized implem of the recurrence_histogram. Works the same,
     but adapted to parallelized computing (automatically done by Numba)."""
     return_distances = np.zeros(len(ts), dtype=np.int32)
 
-    # this is the parallized loop
+    # this is the parallelized loop
     for i in nb.prange(len(ts)):
         # finding the first "out of ball" index
         first_out = len(ts)  # security
         for j in np.arange(i + 1, len(ts)):
-            if t_max > 0 and j - i > t_max:
+            if 0 < t_max < j - i:
                 break
             d = np.linalg.norm(ts[i] - ts[j])
             if d > epsilon:
@@ -59,7 +71,7 @@ def parallel_recurrence_histogram(ts: np.ndarray, epsilon: float,
 
         # finding the first "back to the ball" index
         for j in np.arange(first_out + 1, len(ts)):
-            if t_max > 0 and j - i > t_max:
+            if 0 < t_max < j - i:
                 break
             d = np.linalg.norm(ts[i] - ts[j])
             if d < epsilon:
@@ -97,13 +109,15 @@ def rpde(time_series: np.ndarray,
     Parameters
     ----------
     time_series: np.ndarray
-        The input time series. Has to be floats, normalized to [-1,1]
+        The input time series. Has to be float32, normalized to [-1,1]
     dim: int
-        The dimension of the time series embeddings. Defaults to 4
+        The dimension of the time series embeddings.
+        Defaults to 4
     tau: int
         The "stride" between each of the embedding points in a time series'
-        embedding vector. Defaults to 35. Should be adjusted depending on the
+        embedding vector. Should be adjusted depending on the
         sampling rate of your input data.
+        Defaults to 35.
     epsilon: float
         The size of the unit ball described in the RPDE algorithm.
         Defaults to 0.12.
@@ -114,7 +128,8 @@ def rpde(time_series: np.ndarray,
         Defaults to None.
     parallel: boolean, optional
         Use the parallelized Numba implementation. The parallelization overhead
-        might make this slower in certain situations. Defaults to True.
+        might make this slower in cases where the time series is very short.
+        Defaults to True.
 
     Returns
     -------
