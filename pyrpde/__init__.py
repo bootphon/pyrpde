@@ -78,7 +78,6 @@ def parallel_recurrence_histogram(ts: np.ndarray, epsilon: float,
 def embed_time_series(data: np.ndarray, dim: int, tau: int):
     """Embeds the time series, tested against the pyunicorn implementation
     of that transform"""
-    # TODO : check that this implem holds when the data shape isn't unidimentional
     embed_points_nb = data.shape[0] - (dim - 1) * tau
     # embed_mask is of shape (embed_pts, dim)
     embed_mask = np.arange(embed_points_nb)[:, np.newaxis] + np.arange(dim)
@@ -89,7 +88,7 @@ def embed_time_series(data: np.ndarray, dim: int, tau: int):
 
 def rpde(time_series: np.ndarray,
          dim: int = 4,
-         tau: int = 32,
+         tau: int = 35,
          epsilon: float = 0.12,
          tmax: Optional[int] = None,
          parallel: bool = True) -> Tuple[float, np.ndarray]:
@@ -103,13 +102,16 @@ def rpde(time_series: np.ndarray,
         The dimension of the time series embeddings. Defaults to 4
     tau: int
         The "stride" between each of the embedding points in a time series'
-        embedding vector. Defaults to 32
+        embedding vector. Defaults to 35. Should be adjusted depending on the
+        sampling rate of your input data.
     epsilon: float
         The size of the unit ball described in the RPDE algorithm.
         Defaults to 0.12.
     tmax: int, optional
         Maximum return distance (n1-n0), return distances higher than this
-        are ignored. Defaults to None.
+        are ignored. If set, can greatly improve the speed of the distance
+        histogram computation (especially if your input time series has a lot of points).
+        Defaults to None.
     parallel: boolean, optional
         Use the parallelized Numba implementation. The parallelization overhead
         might make this slower in certain situations. Defaults to True.
@@ -124,8 +126,8 @@ def rpde(time_series: np.ndarray,
     """
 
     # (RPDE expects the array to be floats in [-1,1]
-    if not time_series.dtype == np.float:
-        raise ValueError("Time series should be floats")
+    if not time_series.dtype == np.float32:
+        raise ValueError("Time series should be float32")
 
     if not (np.abs(time_series) <= 1.0).all():
         raise ValueError("The time series' values have to be normalized "
@@ -133,16 +135,25 @@ def rpde(time_series: np.ndarray,
 
     #  building the time series, and computing the recurrence histogram
     embedded_ts = embed_time_series(time_series, dim, tau)
-    
+
+    # "flattening" all dimensions but the first (the number of embedding vectors)
+    # this doesn't change the distances computed in the recurrence histogram,
+    # as it just changes the way the embedding vector are presented, not their values
+    if len(embedded_ts.shape) > 2:
+        embedded_ts = embedded_ts.reshape(embedded_ts.shape[0], -1)
+
     if parallel:
         histogram_fn = parallel_recurrence_histogram
     else:
         histogram_fn = recurrence_histogram
-    
+
     if tmax is None:
         rec_histogram = histogram_fn(embedded_ts, epsilon, -1)
         # tmax is the highest non-zero value in the histogram
-        tmax_idx = np.argwhere(rec_histogram != 0).flatten()[-1]
+        if rec_histogram.max() == 0.0:
+            tmax_idx = 0
+        else:
+            tmax_idx = np.argwhere(rec_histogram != 0).flatten()[-1]
     else:
         rec_histogram = histogram_fn(embedded_ts, epsilon, tmax)
         tmax_idx = tmax

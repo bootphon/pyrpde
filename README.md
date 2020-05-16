@@ -17,4 +17,47 @@ should do the trick.
 
 ## Usage
 
-TODO
+There pretty much is only one function in this package that you should use, `rpde()`.
+Here are its arguments:
+
+```
+    time_series: np.ndarray
+        The input time series. Had to be floats, normalized to [-1,1]
+    dim: int
+        The dimension of the time series embeddings. Defaults to 4
+    tau: int
+        The "stride" between each of the embedding points in a time series'
+        embedding vector. Defaults to 35. Should be adjusted depending on the
+        sampling rate of your input data.
+    epsilon: float
+        The size of the unit ball described in the RPDE algorithm.
+        Defaults to 0.12.
+    tmax: int, optional
+        Maximum return distance (n1-n0), return distances higher than this
+        are ignored. If set, can greatly improve the speed of the distance
+        histogram computation (especially if your input time series has a lot of points).
+        Defaults to None.
+    parallel: boolean, optional
+        Use the parallelized Numba implementation. The parallelization overhead
+        might make this slower in certain situations. Defaults to True.
+```
+
+**NOTE**: the default values for `tau`, `dim` and `epsilon` are adapted from [1] and [2],
+ to work on 16Khz PCM audio. You should probably use `tau=50` for 22.5Khz and `tau=70`
+ for for 48KHz audio. 
+
+Here's an example: 
+
+```python
+from pyrpde import  rpde
+from scipy.io.wavfile import read
+
+# make sure your audio data is in float32. Else, either use librosa or 
+# normalize it [-1,1] by dividing it by 2 ** 16 if it's 16bit PCM
+rate, data = read("audio_data.wav")
+entropy, histogram = rpde(data, tau=30, dim=4, parallel=True, epsilon=0.01)
+
+```
+
+[1]: https://link.springer.com/article/10.1186/1475-925X-6-23
+[2]: http://www.maxlittle.net/software/index.php
