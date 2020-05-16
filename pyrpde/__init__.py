@@ -97,7 +97,7 @@ def rpde(time_series: np.ndarray,
     Parameters
     ----------
     time_series: np.ndarray
-        The input time series. Had to be floats, normalized to [-1,1]
+        The input time series. Has to be floats, normalized to [-1,1]
     dim: int
         The dimension of the time series embeddings. Defaults to 4
     tau: int

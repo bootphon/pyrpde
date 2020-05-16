@@ -1,8 +1,8 @@
 # pyRPDE
 
 A full-python implementation of the Recurrence Period Density Entropy metric.
-It's based on the algorithm described in [1], and based on Max Little's 
-R (and C) implementation in [2].
+It's based on the algorithm described in [^1], and based on Max Little's 
+R (and C) implementation in [^2].
 
 ## Installation
 
@@ -21,8 +21,10 @@ There pretty much is only one function in this package that you should use, `rpd
 Here are its arguments:
 
 ```
+    Arguments:
+    ----------
     time_series: np.ndarray
-        The input time series. Had to be floats, normalized to [-1,1]
+        The input time series. Has to be floats, normalized to [-1,1]
     dim: int
         The dimension of the time series embeddings. Defaults to 4
     tau: int
@@ -40,9 +42,17 @@ Here are its arguments:
     parallel: boolean, optional
         Use the parallelized Numba implementation. The parallelization overhead
         might make this slower in certain situations. Defaults to True.
+    
+    Returns
+    -------
+    rpde: float
+        Value of the RPDE
+    histogram: np.ndarray
+        1-dimensional array corresponding to the histogram of the return
+        distances
 ```
 
-**NOTE**: the default values for `tau`, `dim` and `epsilon` are adapted from [1] and [2],
+**NOTE**: the default values for `tau`, `dim` and `epsilon` are adapted from [^1] and [^2],
  to work on 16Khz PCM audio. You should probably use `tau=50` for 22.5Khz and `tau=70`
  for for 48KHz audio. 
 
@@ -59,5 +69,5 @@ entropy, histogram = rpde(data, tau=30, dim=4, parallel=True, epsilon=0.01)
 
 ```
 
-[1]: https://link.springer.com/article/10.1186/1475-925X-6-23
-[2]: http://www.maxlittle.net/software/index.php
+[^1]: https://link.springer.com/article/10.1186/1475-925X-6-23
+[^2]: http://www.maxlittle.net/software/index.php
