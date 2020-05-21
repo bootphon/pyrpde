@@ -1,3 +1,5 @@
+# Copyright CoML 2020, Licensed under the EUPL
+
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 from os import path

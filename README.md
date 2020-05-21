@@ -57,8 +57,8 @@ Here are its arguments:
 ```
 
 **NOTE**: the default values for `tau`, `dim` and `epsilon` are adapted from [^1] and [^2],
- to work on 16Khz PCM audio. You should probably use `tau=50` for 22.5Khz and `tau=70`
- for for 48KHz audio. 
+ to work on 22.5Khz PCM audio. You should probably use `tau=25` for 16Khz and `tau=50`
+ for 48KHz audio. 
 
 Here's an example: 
 
@@ -67,7 +67,7 @@ from pyrpde import  rpde
 from scipy.io.wavfile import read
 
 # make sure your audio data is in float32. Else, either use librosa or 
-# normalize it [-1,1] by dividing it by 2 ** 16 if it's 16bit PCM
+# normalize it to [-1,1] by dividing it by 2 ** 16 if it's 16bit PCM
 rate, data = read("audio_data.wav")
 entropy, histogram = rpde(data, tau=30, dim=4, epsilon=0.01, tmax=1500)
 
