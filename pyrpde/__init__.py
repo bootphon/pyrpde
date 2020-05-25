@@ -1,4 +1,4 @@
-# Copyright CoML 2020, Licensed under the EUPL
+# Copyright © CoML 2020, Licensed under the EUPL
 
 from typing import Optional, Tuple
 
