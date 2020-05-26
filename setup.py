@@ -15,11 +15,11 @@ with open(path.join(here, 'requirements.txt')) as f:
 
 setup(
     name='pyrpde',
-    version='0.1.1',
+    version='0.1.2',
     description='A Python implementation of the Recurrence Period Density Entropy (RPDE)',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url='https://gitlab.com/bootphon/pyrpde',
+    url='https://github.com/bootphon/pyrpde',
     author='Hadrien Titeux & Rachid Riad',
     author_email='hadrien.titeux@ens.fr',
     license="MIT",
