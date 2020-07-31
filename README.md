@@ -73,5 +73,16 @@ entropy, histogram = rpde(data, tau=30, dim=4, epsilon=0.01, tmax=1500)
 
 ```
 
+## Citing this package
+
+This package was implemented as part of the experimental protocol used in [Riad et Al]. You can find these implementations being used in [the paper's repository].
+If you're willing to make use of this package for your own research, you're welcome to cite our paper:
+
+.. [1] Riad, R, Titeux, H, Lemoine, L., Montillot J. Hamet Bagnou, J. Cao, X., Dupoux, E & Bachoud-Lévi A.-C.
+       *Vocal markers from sustained phonation in Huntington's Disease.*
+       In: INTERSPEECH-2020
+
 [^1]: http://www.biomedical-engineering-online.com/content/6/1/23
 [^2]: http://www.maxlittle.net/software/index.php
+[Riad et Al]: https://arxiv.org/abs/2006.05365
+[the paper's repository]: https://github.com/bootphon/sustained-phonation-features
